@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+    <title>Template</title>
+    <script src="pixi.min.js"></script>
+    <script src="graphics-extras.js"></script>
+    <style>
+    	.controls{ margin-bottom: 15px; }
+    </style>
+</head>
+
+<body>
+<div class="controls">
+    	<button id="gravityPlus" >+</button><span>Gravity value:</span><span id="gravityValue" >1</span> <button id="gravityMinus" >-</button>
+    	<button id="shapesPlus" >+</button><span>Shapes per second:</span><span id="shapesVal" >1</span> <button id="shapesMinus">-</button>
+    </div>
+
+    <script type="text/javascript">
+    function getRandomInt(num) {
+        return Math.floor(Math.random() * Math.floor(num));
+    }
+
+    function getRandomShape() {
+        let shapeNum = getRandomInt(7);
+        let shapeType = '';
+        if (shapeNum == 0) {
+            shapeType = 'circle';
+        } else if (shapeNum == 1) {
+            shapeType = 'ellipse';
+        } else if (shapeNum == 2) {
+            shapeType = 'rectangle';
+        }else if(shapeNum == 3){
+        	shapeType = '3side';
+        }else if(shapeNum == 4){
+        	shapeType = '4side';
+        }else if(shapeNum == 5){
+        	shapeType = '5side';
+        }else if(shapeNum == 6){
+        	shapeType = '6side';
+        }
+        return shapeType;
+    }
+
+    function makeRandomColor() {
+        const red = getRandomInt(256);
+        const green = getRandomInt(256);
+        const blue = getRandomInt(256);
+
+        const hexRed = red.toString(16);
+        const hexGreen = green.toString(16);
+        const hexBlue = blue.toString(16);
+        const fullColor = '0x' + hexRed + hexGreen + hexBlue;
+        return fullColor;
+    }
+
+    const randomColor = makeRandomColor();
+
+    let type = "WebGL"
+    if (!PIXI.utils.isWebGLSupported()) {
+        type = "canvas"
+    }
+
+    PIXI.utils.sayHello(type)
+
+    let app = new PIXI.Application({ width: 1200, height: 600 });
+    document.body.appendChild(app.view);
+    app.renderer.backgroundColor = 0x061639;
+
+    const gravityPlus = document.getElementById("gravityPlus");
+    const gravityMinus = document.getElementById("gravityMinus");
+    const shapesPlus = document.getElementById("shapesPlus");
+    const shapesMinus = document.getElementById("shapesMinus");
+    const gravityValue = document.getElementById("gravityValue");
+    const shapesVal = document.getElementById("shapesVal");
+
+    gravityPlus.addEventListener("click", function(){
+    	if(speed===10){
+    		return
+    	}else{
+    		speed++;
+    		gravityValue.textContent = speed;
+    		//console.log(speed);
+    	}
+    })
+
+    gravityMinus.addEventListener("click", function(){
+    	if(speed===1){
+    		return
+    	}else{
+    		speed--;
+    		gravityValue.textContent = speed;
+    	}
+    });
+
+    shapesPlus.addEventListener("click", function(){
+    	shapesPerSec++;
+    	shapesVal.textContent = shapesPerSec;
+    })
+
+    shapesMinus.addEventListener("click", function(){
+    	if(shapesPerSec===1){
+    		return;
+    	}
+    	    	shapesPerSec--;
+    	shapesVal.textContent = shapesPerSec;
+    })
+
+    function makeShape(){
+    	let shapeType = getRandomShape();
+        let color = makeRandomColor();
+        let xPos = getRandomInt(1201);
+
+        let shape = new PIXI.Graphics();
+        shape.beginFill(color);
+        if (shapeType == 'circle') {
+            shape.drawCircle(0, 0, 50);
+        } else if (shapeType == 'ellipse') {
+            shape.drawEllipse(0, 0, 50, 30);
+        } else if (shapeType == 'rectangle') {
+            shape.drawRect(0, 0, 100, 100);
+        }else if(shapeType == '3side'){
+        	shape.drawRegularPolygon(0,0,50,3,0);
+        }else if(shapeType == '4side'){
+        	shape.drawRegularPolygon(0,0,50,4,0);
+        }else if(shapeType == '5side'){
+        	shape.drawRegularPolygon(0,0,50,5,0);
+        }else if(shapeType == '6side'){
+        	shape.drawRegularPolygon(0,0,50,6,0);
+        }
+        shape.endFill();
+        shape.x = xPos;
+        shape.y = -100;
+        shape.interactive = true;
+        shape.on('click', function(){
+        	app.stage.removeChild(this);
+        })
+        app.stage.addChild(shape);
+    }
+
+    var shapesPerSec = 1;
+
+    var mainLoop = setInterval(function() {
+        for(let i=0;i<shapesPerSec;i++){
+        	makeShape();
+        }
+    }, 1000)
+
+    app.ticker.add(delta => gameLoop(delta));
+    var speed = 1;
+    function gameLoop(delta) {
+        app.stage.children.forEach(child => {
+            child.vy = speed;
+            if(child.y == 650){
+            	child.vy = 0;
+            	app.stage.removeChild(child);
+            }
+            child.y += child.vy;
+        })
+    }
+    </script>
+</body>
+</html>
